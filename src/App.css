@@ -1,38 +1,132 @@
-.App {
-  text-align: center;
+.word-card {
+  font-size: 36px;
+  margin-bottom: 20px;
+  padding: 20px;
+  width: 300px;
+  height: 200px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.word-card-front {
+  background-color: #87CEEB; 
+  color: #F0F0F0; 
+  border: 1px solid #ddd;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.word-card-back {
+  background-color: #F0F0F0; 
+  color: #87CEEB;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.select-language {
+  padding: 10px;
+  width: 200px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.next-button {
+  background-color: #4CAF50;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  margin-right: 20px;
+}
+
+.next-button:hover {
+  background-color: #3e8e41;
+}
+
+h1, h2 {
+  color: #3498db; /* New blue color */
+}
+
+form {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+label {
+  margin-right: 10px;
+  font-size: 18px;
+  color: #3498db; /* New blue color */
+}
+
+input[type="text"] {
+  padding: 10px;
+  width: 200px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+button {
+  background-color: #4CAF50;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+button:hover {
+  background-color: #3e8e41;
+}
+
+.translation-section {
+  margin-bottom: 20px; /* Add space between translation sections */
+}
+
+.translation-section label {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.translation-section input {
+  margin-right: 10px;
+}
+
+.error-message {
+  color: red;
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+.success-message {
+  color: green;
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+select {
+  padding: 10px;
+  width: 200px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  margin-bottom: 20px;
+  margin-right: 10px;
+}
+
+.centered-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.button-container {
+  display: flex;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.button-container button {
+  margin: 0 10px;
 }

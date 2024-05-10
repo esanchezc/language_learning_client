@@ -1,25 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <div>
+            <h1 style={{textAlign: 'center'}}>Word Learner</h1>
+            <form>
+                <div className="translation-section" style={{textAlign: 'center'}}>
+                    <Link to="/learn-words" className="next-button" style={{display: 'inline-block', textDecoration: 'none'}}>Learn words</Link>
+                    <Link to="/add-new-words" className="next-button" style={{display: 'inline-block', textDecoration: 'none'}}>Add new words</Link>
+                </div>
+            </form>
+        </div>
+    );
 }
 
 export default App;
