@@ -130,3 +130,22 @@ select {
 .button-container button {
   margin: 0 10px;
 }
+
+.image-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.image-container img {
+  margin-bottom: 10px; /* Increase the bottom margin to add more space */
+}
+
+.image-container label {
+  display: block;
+  text-align: center; /* Center the label */
+  margin-bottom: 10px;
+}
+
+.image-container input {
+  order: 2;
+}
