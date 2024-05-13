@@ -149,3 +149,21 @@ select {
 .image-container input {
   order: 2;
 }
+
+.correct {
+  color: green;
+}
+
+.incorrect {
+  color: red;
+}
+
+button {
+  margin-bottom: 10px;
+}
+
+.button-group button {
+  display: inline-block;
+  width: 100px; /* adjust this value to set the desired button width */
+  margin-right: 10px; /* add this line to add space between the buttons */
+}

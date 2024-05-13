@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import 'font-awesome/css/font-awesome.min.css';
+
+
 
 function PracticeWords() {
     const [selectedLanguage, setSelectedLanguage] = useState('');
     const [languages, setLanguages] = useState([]);
     const [userAnswer, setUserAnswer] = useState('');
-    const [image, setImage] = useState(''); 
-    const [correctAnswer, setCorrectAnswer] = useState(''); 
+    const [image, setImage] = useState('');
+    const [correctAnswer, setCorrectAnswer] = useState('');
+    const [wordName, setWordName] = useState('');
+    const [isCorrect, setIsCorrect] = useState(null);
+    const [words, setWords] = useState([]);
+    const [currentWord, setCurrentWord] = useState({});
 
     useEffect(() => {
         fetch('/languages')
@@ -23,32 +30,46 @@ function PracticeWords() {
         fetch('/words')
             .then(response => response.json())
             .then(data => {
+                setWords(data);
                 const randomWord = data[Math.floor(Math.random() * data.length)];
-                setImage(`/icons/${randomWord.word}.png`); // assuming that the image is named as the word and stored in the 'icons' directory
-                setCorrectAnswer(randomWord.word);
+                setCurrentWord(randomWord);
+                setImage(`/icons/${randomWord.word}.png`);
+                setCorrectAnswer(randomWord.id);
+                setWordName(randomWord.word);
             });
     }, []);
 
-    const handleCheck = () => {
+    const handleCheck = (event) => {
+        event.preventDefault();
         fetch(`/words/${correctAnswer}/translations/${selectedLanguage}`)
             .then(response => response.json())
             .then(data => {
                 const correctTranslation = data.translation;
                 if (userAnswer.toLowerCase() === correctTranslation.toLowerCase()) {
-                    alert('Correct!');
+                    setIsCorrect(true);
                 } else {
-                    alert(`Incorrect. The correct answer is ${correctTranslation}.`);
+                    setIsCorrect(false);
                 }
             })
             .catch(error => {
                 console.error(error);
-                alert('An error occurred while checking the answer.');
             });
     };
 
     const handleLanguageChange = (event) => {
         setSelectedLanguage(event.target.value);
     };
+
+    const handleNext = () => {
+        const randomWord = words[Math.floor(Math.random() * words.length)];
+        setCurrentWord(randomWord);
+        setImage(`/icons/${randomWord.word}.png`);
+        setCorrectAnswer(randomWord.id);
+        setWordName(randomWord.word);
+        setUserAnswer('');
+        setIsCorrect(null);
+    };
+
 
     const onImageError = (event) => {
         event.target.src = '/icons/empty-basket.png';
@@ -72,10 +93,31 @@ function PracticeWords() {
                 </select>
                 <div className="image-container">
                     <img src={image} alt="Fruit" className="image" onError={onImageError} />
-                    <label>{correctAnswer}</label>
+                    <label>{wordName}</label>
                 </div>
                 <input type="text" value={userAnswer} onChange={(e) => setUserAnswer(e.target.value)} />
-                <button onClick={handleCheck}>Check</button>
+                <div className="button-group">
+                    <button type="submit" onClick={handleCheck}>Check</button>
+                    {isCorrect && (
+                        <button onClick={handleNext}>Next</button>
+                    )}
+                    {isCorrect === false && (
+                        <button onClick={handleNext}>Skip</button>
+                    )}
+                </div>
+                {isCorrect !== null && (
+                    <div>
+                        {isCorrect ? (
+                            <div className='correct'>
+                                Correct! <i class="fa fa-check" aria-hidden="true"></i>
+                            </div>
+                        ) : (
+                            <div className='incorrect'>
+                                Incorrect. Try again! <i class="fa fa-times" aria-hidden="true"></i>
+                            </div>
+                        )}
+                    </div>
+                )}
             </form>
         </div>
     );
