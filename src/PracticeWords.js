@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import deburr from 'lodash.deburr';
 import 'font-awesome/css/font-awesome.min.css';
+import './styles/base.css';
 
 function PracticeWords() {
     const [selectedLanguage, setSelectedLanguage] = useState('');

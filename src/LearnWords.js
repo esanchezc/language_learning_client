@@ -1,22 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import WordCard from './WordCard';
-import './App.css';
+import './styles/base.css';
 
 function LearnWords() {
     const [words, setWords] = useState([]);
     const [error, setError] = useState(null);
     const [currentWordIndex, setCurrentWordIndex] = useState(0);
-    const [showTranslation, setShowTranslation] = useState(false);
-    const [translation, setTranslation] = useState(null);
-    const [languages, setLanguages] = useState([]);
     const [selectedLanguage, setSelectedLanguage] = useState('');
+    const [languages, setLanguages] = useState([]);
+    const [image, setImage] = useState('');
+    const [translation, setTranslation] = useState('');
 
     useEffect(() => {
         fetch('/languages')
             .then(response => response.json())
             .then(data => {
                 setLanguages(data);
-                // Set the default language code to Spanish if it exists in the languages array
                 const spanishLanguage = data.find(language => language.name === 'Spanish');
                 if (spanishLanguage) {
                     setSelectedLanguage(spanishLanguage.code);
@@ -29,34 +27,15 @@ function LearnWords() {
             .then(response => response.json())
             .then(data => {
                 setWords(data);
-                // Set the currentWordIndex to a random index within the bounds of the words array
                 setCurrentWordIndex(Math.floor(Math.random() * data.length));
             })
             .catch(err => setError(err.message));
     }, []);
 
-    if (words.length === 0) {
-        return <div>Loading...</div>;
-    }
-
-    const currentWord = words[currentWordIndex];
-
-    const handleNextClick = () => {
-        setCurrentWordIndex((currentWordIndex + 1) % words.length);
-        setShowTranslation(false);
-        setTranslation(null);
-        setError(null); // Clear the error message
-    };
-
-    const handlePrevClick = () => {
-        setCurrentWordIndex((currentWordIndex - 1 + words.length) % words.length);
-        setShowTranslation(false);
-        setTranslation(null);
-        setError(null); // Clear the error message
-    };
-
-    const handleWordClick = () => {
-        if (!showTranslation) {
+    useEffect(() => {
+        if (words.length > 0 && selectedLanguage) {
+            const currentWord = words[currentWordIndex];
+            setImage(`/icons/${currentWord.word}.png`);
             fetch(`/words/${currentWord.id}/translations/${selectedLanguage}`)
                 .then(response => response.text())
                 .then(data => {
@@ -65,7 +44,7 @@ function LearnWords() {
                         if (jsonData.translation) {
                             setTranslation(jsonData.translation);
                         } else {
-                            setTranslation(null);
+                            setTranslation('');
                             setError('Translation not found.');
                         }
                     } catch (error) {
@@ -74,7 +53,16 @@ function LearnWords() {
                 })
                 .catch(err => setError(err.message));
         }
-        setShowTranslation(!showTranslation);
+    }, [currentWordIndex, selectedLanguage]);
+
+    const handleNextClick = () => {
+        setCurrentWordIndex((currentWordIndex + 1) % words.length);
+        setError(null); // Clear the error message
+    };
+
+    const handlePrevClick = () => {
+        setCurrentWordIndex((currentWordIndex - 1 + words.length) % words.length);
+        setError(null); // Clear the error message
     };
 
     const handleLanguageChange = (event) => {
@@ -82,8 +70,13 @@ function LearnWords() {
         setError(null); // Clear the error message
     };
 
+    const onImageError = (event) => {
+        event.target.src = '/icons/empty-basket.png';
+    }
+
     return (
         <form className="centered-form">
+            <h1>Learn Words</h1>
             <select
                 className="select-language"
                 onChange={handleLanguageChange}
@@ -96,17 +89,13 @@ function LearnWords() {
                     </option>
                 ))}
             </select>
-            <div
-                className={`word-card ${showTranslation ? 'word-card-back' : 'word-card-front'}`}
-                onClick={handleWordClick} // add the onClick event handler here
-            >
-                <WordCard
-                    word={currentWord}
-                    languageCode={selectedLanguage}
-                    translation={translation}
-                    showTranslation={showTranslation}
-                />
-            </div>
+            {words.length > 0 && (
+                <div className="image-container">
+                    <img src={image} alt="Word" onError={onImageError} />
+                    <label className="original-word">{words[currentWordIndex].word}</label>
+                    <label className="translated-word">{translation}</label>
+                </div>
+            )}
             <div className="button-container">
                 <button
                     type="button"

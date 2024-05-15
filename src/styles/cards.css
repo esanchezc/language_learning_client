@@ -1,0 +1,23 @@
+.word-card {
+    font-size: 36px;
+    margin-bottom: 20px;
+    padding: 20px;
+    width: 300px;
+    height: 200px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .word-card-front {
+    background-color: #87CEEB; 
+    color: #F0F0F0; 
+    border: 1px solid #ddd;
+  }
+  
+  .word-card-back {
+    background-color: #F0F0F0; 
+    color: #87CEEB;
+  }

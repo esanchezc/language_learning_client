@@ -3,6 +3,7 @@ import { Link, Route, Routes } from 'react-router-dom';
 import PracticeWords from './PracticeWords';
 import LearnWords from './LearnWords';
 import AddNewWords from './AddNewWords';
+import './styles/base.css';
 
 function App() {
     return (
