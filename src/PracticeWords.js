@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import deburr from 'lodash.deburr';
 import 'font-awesome/css/font-awesome.min.css';
 
 function PracticeWords() {
@@ -52,7 +53,9 @@ function PracticeWords() {
             .then(data => {
                 const correctTranslation = data.translation;
                 setCorrectTranslation(correctTranslation);
-                if (userAnswer.toLowerCase() === correctTranslation.toLowerCase()) {
+                const cleanUserAnswer = deburr(userAnswer.toLowerCase());
+                const cleanCorrectTranslation = deburr(correctTranslation.toLowerCase());
+                if (cleanUserAnswer === cleanCorrectTranslation) {
                     setIsCorrect(true);
                     setCorrectCount(correctCount + 1);
                     setWords(words.filter(word => word.id !== correctAnswer)); // remove the word from the list
@@ -91,6 +94,24 @@ function PracticeWords() {
         }
     };
 
+    const handlePracticeAgain = () => {
+        setCorrectCount(0);
+        setIncorrectCount(0);
+        setUserAnswer('');
+        setIsCorrect(null);
+        fetch(`/words/${selectedLanguage}`)
+            .then(response => response.json())
+            .then(data => {
+                const shuffledData = data.sort(() => Math.random() - 0.5); // shuffle the array
+                setWords(shuffledData.slice(0, 10)); // select up to 10 words or all if less than 10
+                const randomWord = shuffledData[0];
+                setCurrentWord(randomWord);
+                setImage(`/icons/${randomWord.word}.png`);
+                setCorrectAnswer(randomWord.id);
+                setWordName(randomWord.word);
+            });
+    }
+
     const handleSkip = () => {
         handleNext();
     };
@@ -128,21 +149,25 @@ function PracticeWords() {
                 <div className="celebration-container">
                     <img src="/icons/celebration.png" alt="Celebration" className="celebration-image" />
                     <h2 className="congratulations-message">Congratulations! You have correctly answered all words.</h2>
+                    <button onClick={handlePracticeAgain}>Practice again</button>
+                    <button onClick={() => window.location.href = '/'}>Home</button>
                 </div>
             )}
             <form>
-                <select
-                    className="select-language"
-                    onChange={handleLanguageChange}
-                    value={selectedLanguage}
-                >
-                    <option value="">Select a language</option>
-                    {languages.map((language) => (
-                        <option key={language.code} value={language.code}>
-                            {language.name}
-                        </option>
-                    ))}
-                </select>
+                {words.length > 0 && (
+                    <select
+                        className="select-language"
+                        onChange={handleLanguageChange}
+                        value={selectedLanguage}
+                    >
+                        <option value="">Select a language</option>
+                        {languages.map((language) => (
+                            <option key={language.code} value={language.code}>
+                                {language.name}
+                            </option>
+                        ))}
+                    </select>
+                )}
                 {words.length > 0 && (
                     <div className="image-container">
                         <img src={image} alt="Fruit" className="image" onError={onImageError} />
