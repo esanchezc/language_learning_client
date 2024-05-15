@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import deburr from 'lodash.deburr';
 import 'font-awesome/css/font-awesome.min.css';
 
@@ -17,6 +17,7 @@ function PracticeWords() {
     const [showDialog, setShowDialog] = useState(false);
     const [newLanguage, setNewLanguage] = useState('');
     const [correctTranslation, setCorrectTranslation] = useState('');
+    const inputRef = useRef(null);
 
     useEffect(() => {
         fetch('/languages')
@@ -30,24 +31,27 @@ function PracticeWords() {
             });
     }, []);
 
+    const fetchWords = (language) => {
+        fetch(`/words/${language}`)
+            .then(response => response.json())
+            .then(data => {
+                const shuffledData = data.sort(() => Math.random() - 0.5); // shuffle the array
+                setWords(shuffledData.slice(0, 10)); // select up to 10 words or all if less than 10
+                const randomWord = shuffledData[0];
+                setCurrentWord(randomWord);
+                setImage(`/icons/${randomWord.word}.png`);
+                setCorrectAnswer(randomWord.id);
+                setWordName(randomWord.word);
+            });
+    };
+
     useEffect(() => {
         if (selectedLanguage) {
-            fetch(`/words/${selectedLanguage}`)
-                .then(response => response.json())
-                .then(data => {
-                    const shuffledData = data.sort(() => Math.random() - 0.5); // shuffle the array
-                    setWords(shuffledData.slice(0, 10)); // select up to 10 words or all if less than 10
-                    const randomWord = shuffledData[0];
-                    setCurrentWord(randomWord);
-                    setImage(`/icons/${randomWord.word}.png`);
-                    setCorrectAnswer(randomWord.id);
-                    setWordName(randomWord.word);
-                });
+            fetchWords(selectedLanguage);
         }
     }, [selectedLanguage]);
 
-    const handleCheck = (event) => {
-        event.preventDefault();
+    const checkUserAnswer = () => {
         fetch(`/words/${correctAnswer}/translations/${selectedLanguage}`)
             .then(response => response.json())
             .then(data => {
@@ -70,6 +74,18 @@ function PracticeWords() {
             });
     };
 
+    const handleCheck = (event) => {
+        event.preventDefault();
+        if (userAnswer.trim() !== '') { // check if input is not empty
+            checkUserAnswer();
+            if (!isCorrect) {
+                setUserAnswer(''); // clear the text box if answer is incorrect
+                inputRef.current.focus();
+            }
+        }
+    };
+
+
     const handleLanguageChange = (event) => {
         setNewLanguage(event.target.value);
         if (correctCount > 0) {
@@ -79,7 +95,8 @@ function PracticeWords() {
         }
     };
 
-    const handleNext = () => {
+    const handleNext = (event) => {
+        event.preventDefault();
         if (words.length > 0) {
             const randomWord = words[Math.floor(Math.random() * words.length)];
             setCurrentWord(randomWord);
@@ -89,6 +106,7 @@ function PracticeWords() {
             setUserAnswer('');
             setIsCorrect(null);
             setIncorrectCount(0);
+            inputRef.current.focus();
         } else {
             setImage('/icons/celebration.png'); // show a celebratory image
         }
@@ -99,17 +117,7 @@ function PracticeWords() {
         setIncorrectCount(0);
         setUserAnswer('');
         setIsCorrect(null);
-        fetch(`/words/${selectedLanguage}`)
-            .then(response => response.json())
-            .then(data => {
-                const shuffledData = data.sort(() => Math.random() - 0.5); // shuffle the array
-                setWords(shuffledData.slice(0, 10)); // select up to 10 words or all if less than 10
-                const randomWord = shuffledData[0];
-                setCurrentWord(randomWord);
-                setImage(`/icons/${randomWord.word}.png`);
-                setCorrectAnswer(randomWord.id);
-                setWordName(randomWord.word);
-            });
+        fetchWords(selectedLanguage);
     }
 
     const handleSkip = () => {
@@ -149,8 +157,10 @@ function PracticeWords() {
                 <div className="celebration-container">
                     <img src="/icons/celebration.png" alt="Celebration" className="celebration-image" />
                     <h2 className="congratulations-message">Congratulations! You have correctly answered all words.</h2>
-                    <button onClick={handlePracticeAgain}>Practice again</button>
-                    <button onClick={() => window.location.href = '/'}>Home</button>
+                    <div className="button-group">
+                        <button onClick={handlePracticeAgain}>Practice again</button>
+                        <button onClick={() => window.location.href = '/'}>Home</button>
+                    </div>
                 </div>
             )}
             <form>
@@ -175,13 +185,15 @@ function PracticeWords() {
                     </div>
                 )}
                 {words.length > 0 && (
-                    <input type="text" value={userAnswer} onChange={(e) => setUserAnswer(e.target.value)} />
+                    <input type="text" value={userAnswer} onChange={(e) => setUserAnswer(e.target.value)} ref={inputRef} />
                 )}
                 {words.length > 0 && (
                     <div className="button-group">
-                        <button type="submit" onClick={handleCheck} disabled={incorrectCount >= 3} className={incorrectCount >= 3 ? 'disabled-button' : ''}>Check</button>
+                        {!isCorrect && (
+                            <button type="submit" onClick={handleCheck} disabled={incorrectCount >= 3} className={incorrectCount >= 3 ? 'disabled-button' : ''}>Check</button>
+                        )}
                         {(isCorrect || incorrectCount >= 3) && (
-                            <button onClick={handleNext}>Next</button>
+                            <button autoFocus onClick={handleNext}>Next</button>
                         )}
                         {isCorrect === false && incorrectCount < 3 && (
                             <button onClick={handleSkip}>Skip</button>
