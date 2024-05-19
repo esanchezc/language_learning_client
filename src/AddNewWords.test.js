@@ -7,7 +7,7 @@ import AddNewWords from './AddNewWords';
 
 jest.mock('axios');
 
-describe.only('AddNewWords component', () => {
+describe('AddNewWords component', () => {
     beforeEach(() => {
         global.fetch = jest.fn();
 
@@ -89,7 +89,7 @@ describe.only('AddNewWords component', () => {
             translations: [{ languageCode: 'en', translation: 'test translation' }],
         });
     });
-    
+
     it('displays error message on failed form submission', async () => {
         const { getByText, getByLabelText } = render(<AddNewWords />);
         const wordInput = getByLabelText('Word:');

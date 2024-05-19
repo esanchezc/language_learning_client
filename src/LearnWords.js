@@ -31,7 +31,6 @@ function LearnWords() {
             })
             .catch(error => {
                 setError(error.message)
-                console.error('Error fetching words:', error);
             });
     }, []);
 
@@ -42,7 +41,6 @@ function LearnWords() {
             fetch(`/words/${currentWord.id}/translations/${selectedLanguage}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Response data:', data);
                     if (data.translation) {
                         setTranslation(data.translation);
                     } else {
@@ -51,7 +49,6 @@ function LearnWords() {
                     }
                 })
                 .catch(error => {
-                    console.error('Error parsing JSON response:', error);
                     setError('Error parsing JSON response.');
                 });
         }
