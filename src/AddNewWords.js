@@ -13,7 +13,7 @@ function AddNewWords() {
         fetch('/languages')
             .then(response => response.json())
             .then(data => setLanguages(data))
-            .catch(error => console.error(error));
+            .catch(error => setError('An error occurred while fetching languages'));
     }, []);
 
     const handleAddTranslation = () => {
@@ -24,10 +24,24 @@ function AddNewWords() {
         setTranslations(translations.filter((translation, i) => i !== index));
     };
 
+    const handleLanguageChange = (index, languageCode) => {
+        const newTranslations = translations.map((t, i) => {
+            if (i === index) {
+                return { ...t, languageCode };
+            }
+            return t;
+        });
+        setTranslations(newTranslations);
+    };
+
+    const handleTranslationChange = (index, translation) => {
+        const newTranslations = [...translations];
+        newTranslations[index].translation = translation;
+        setTranslations(newTranslations);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        console.log('Translations:', translations); // Add this line
 
         try {
             const response = await axios.post('/words', { word, translations });
@@ -56,16 +70,7 @@ function AddNewWords() {
                         <select id="languageCode"
                             data-testid="language-select"
                             value={translation.languageCode}
-                            onChange={(e) => {
-                                console.log('Selected language code:', e.target.value);
-                                const newTranslations = translations.map((t, i) => {
-                                    if (i === index) {
-                                        return { ...t, languageCode: e.target.value };
-                                    }
-                                    return t;
-                                });
-                                setTranslations(newTranslations);
-                            }}
+                            onChange={(e) => handleLanguageChange(index, e.target.value)}
                             required
                         >
                             <option value="">Select Language</option>
@@ -79,11 +84,7 @@ function AddNewWords() {
                         <input id="translation"
                             type="text"
                             value={translation.translation}
-                            onChange={(e) => {
-                                const newTranslations = [...translations];
-                                newTranslations[index].translation = e.target.value;
-                                setTranslations(newTranslations);
-                            }}
+                            onChange={(e) => handleTranslationChange(index, e.target.value)}
                             required
                         />
                         <button onClick={() => handleRemoveTranslation(index)}>Remove Translation</button>
