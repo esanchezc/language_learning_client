@@ -27,13 +27,18 @@ function AddNewWords() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        console.log('Translations:', translations); // Add this line
+
         try {
             const response = await axios.post('/words', { word, translations });
             setSuccess(response.data.message);
             setError(null);
         } catch (err) {
-            setError(err.response.data.message);
-            setSuccess(null);
+            if (err.response && err.response.data) {
+                setError(err.response.data.message);
+            } else {
+                setError('An unknown error occurred');
+            }
         }
     };
 
@@ -41,18 +46,24 @@ function AddNewWords() {
         <div>
             <h1>Add New Word</h1>
             <form onSubmit={handleSubmit}>
-                <label>Word:</label>
-                <input type="text" value={word} onChange={(e) => setWord(e.target.value)} required />
+                <label htmlFor="word">Word:</label>
+                <input id="word" type="text" value={word} onChange={(e) => setWord(e.target.value)} required />
                 <br />
                 <h2>Translations:</h2>
                 {translations.map((translation, index) => (
                     <div key={index} className="translation-section">
-                        <label>Language Code:</label>
-                        <select
+                        <label htmlFor="languageCode">Language Code:</label>
+                        <select id="languageCode"
+                            data-testid="language-select"
                             value={translation.languageCode}
                             onChange={(e) => {
-                                const newTranslations = [...translations];
-                                newTranslations[index].languageCode = e.target.value;
+                                console.log('Selected language code:', e.target.value);
+                                const newTranslations = translations.map((t, i) => {
+                                    if (i === index) {
+                                        return { ...t, languageCode: e.target.value };
+                                    }
+                                    return t;
+                                });
                                 setTranslations(newTranslations);
                             }}
                             required
@@ -64,8 +75,8 @@ function AddNewWords() {
                                 </option>
                             ))}
                         </select>
-                        <label>Translation:</label>
-                        <input
+                        <label htmlFor="translation">Translation:</label>
+                        <input id="translation"
                             type="text"
                             value={translation.translation}
                             onChange={(e) => {

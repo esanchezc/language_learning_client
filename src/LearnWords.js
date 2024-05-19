@@ -29,7 +29,10 @@ function LearnWords() {
                 setWords(data);
                 setCurrentWordIndex(Math.floor(Math.random() * data.length));
             })
-            .catch(err => setError(err.message));
+            .catch(error => {
+                setError(error.message)
+                console.error('Error fetching words:', error);
+            });
     }, []);
 
     useEffect(() => {
@@ -37,21 +40,20 @@ function LearnWords() {
             const currentWord = words[currentWordIndex];
             setImage(`/icons/${currentWord.word}.png`);
             fetch(`/words/${currentWord.id}/translations/${selectedLanguage}`)
-                .then(response => response.text())
+                .then(response => response.json())
                 .then(data => {
-                    try {
-                        const jsonData = JSON.parse(data);
-                        if (jsonData.translation) {
-                            setTranslation(jsonData.translation);
-                        } else {
-                            setTranslation('');
-                            setError('Translation not found.');
-                        }
-                    } catch (error) {
-                        setError('Error parsing JSON response.');
+                    console.log('Response data:', data);
+                    if (data.translation) {
+                        setTranslation(data.translation);
+                    } else {
+                        setTranslation('');
+                        setError('Translation not found.');
                     }
                 })
-                .catch(err => setError(err.message));
+                .catch(error => {
+                    console.error('Error parsing JSON response:', error);
+                    setError('Error parsing JSON response.');
+                });
         }
     }, [currentWordIndex, selectedLanguage]);
 
@@ -78,6 +80,7 @@ function LearnWords() {
         <form className="centered-form">
             <h1>Learn Words</h1>
             <select
+                data-testid="language-select"
                 className="select-language"
                 onChange={handleLanguageChange}
                 value={selectedLanguage}
