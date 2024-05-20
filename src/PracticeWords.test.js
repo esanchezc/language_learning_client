@@ -40,7 +40,9 @@ const setup = async () => {
     const option = utils.getByText('Spanish');
     fireEvent.change(select, { target: { value: 'es' } });
     await waitFor(() => utils.getByTestId('answer-input'));
-    return utils;
+    const wordElement = utils.getByTestId('word-label');
+    const wordText = wordElement.textContent;
+    return { ...utils, word: wordText };
 };
 
 describe('PracticeWords', () => {
@@ -76,10 +78,12 @@ describe('PracticeWords', () => {
     });
 
     it('renders correct translation when answer is incorrect', async () => {
-        const { getByText, getByTestId } = await setup();
-        const correctTranslation = await global.fetch('/translations/')
-            .then(response => response.json())
-            .then(data => data.translation);
+        const { getByText, getByTestId, word } = await setup();
+        const words = [
+            { word: 'Apple', id: 1, translation: 'Manzana' },
+            { word: 'Banana', id: 2, translation: 'Plátano' },
+        ];
+        const correctTranslation = words.find(w => w.word === word).translation;
 
         const wordElement = getByTestId('word-label');
         const wordText = wordElement.textContent;
