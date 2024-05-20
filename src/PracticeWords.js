@@ -52,40 +52,41 @@ function PracticeWords() {
         }
     }, [selectedLanguage]);
 
-    const checkUserAnswer = () => {
-        fetch(`/words/${correctAnswer}/translations/${selectedLanguage}`)
-            .then(response => response.json())
-            .then(data => {
-                const correctTranslation = data.translation;
-                setCorrectTranslation(correctTranslation);
-                const cleanUserAnswer = deburr(userAnswer.toLowerCase());
-                const cleanCorrectTranslation = deburr(correctTranslation.toLowerCase());
-                if (cleanUserAnswer === cleanCorrectTranslation) {
-                    setIsCorrect(true);
-                    setCorrectCount(correctCount + 1);
-                    setWords(words.filter(word => word.id !== correctAnswer)); // remove the word from the list
-                    setIncorrectCount(0);
-                } else {
-                    setIsCorrect(false);
-                    setIncorrectCount(incorrectCount + 1);
-                }
-            })
-            .catch(error => {
-                console.error(error);
-            });
-    };
+    useEffect(() => {
+        console.log('incorrectCount:', incorrectCount);
+    }, [incorrectCount]);
 
-    const handleCheck = (event) => {
-        event.preventDefault();
-        if (userAnswer.trim() !== '') { // check if input is not empty
-            checkUserAnswer();
-            if (!isCorrect) {
-                setUserAnswer(''); // clear the text box if answer is incorrect
-                inputRef.current.focus();
+    const checkUserAnswer = async () => {
+        const response = await fetch(`/words/${correctAnswer}/translations/${selectedLanguage}`);
+        const data = await response.json();
+        const correctTranslation = data.translation;
+        setCorrectTranslation(correctTranslation);
+        const cleanUserAnswer = deburr(userAnswer.toLowerCase());
+        const cleanCorrectTranslation = deburr(correctTranslation.toLowerCase());
+        if (cleanUserAnswer && cleanCorrectTranslation) {
+            if (cleanUserAnswer === cleanCorrectTranslation) {
+                setIsCorrect(true);
+                setCorrectCount(correctCount + 1);
+                setWords(words.filter(word => word.id !== correctAnswer)); // remove the word from the list
+                setIncorrectCount(0);
+            } else {
+                setIsCorrect(false);
+                setIncorrectCount(incorrectCount + 1);
             }
         }
     };
 
+    const handleCheck = async (event) => {
+        event.preventDefault();
+        if (userAnswer.trim() !== '') {
+            setUserAnswer(userAnswer.trim()); // update userAnswer state
+            await checkUserAnswer(); // wait for checkUserAnswer to finish
+            if (!isCorrect) {
+                setUserAnswer('');
+                inputRef.current.focus();
+            }
+        }
+    };
 
     const handleLanguageChange = (event) => {
         setNewLanguage(event.target.value);
@@ -167,6 +168,7 @@ function PracticeWords() {
             <form>
                 {words.length > 0 && (
                     <select
+                        data-testid="select-language"
                         className="select-language"
                         onChange={handleLanguageChange}
                         value={selectedLanguage}
@@ -182,11 +184,11 @@ function PracticeWords() {
                 {words.length > 0 && (
                     <div className="image-container">
                         <img src={image} alt="Fruit" className="image" onError={onImageError} />
-                        <label>{wordName}</label>
+                        <label data-testid="word-label">{wordName}</label>
                     </div>
                 )}
                 {words.length > 0 && (
-                    <input type="text" value={userAnswer} onChange={(e) => setUserAnswer(e.target.value)} ref={inputRef} />
+                    <input type="text" value={userAnswer} onChange={(e) => setUserAnswer(e.target.value)} ref={inputRef} data-testid="answer-input" />
                 )}
                 {words.length > 0 && (
                     <div className="button-group">
