@@ -8,15 +8,15 @@ beforeEach(() => {
         if (url.includes('/translations/')) {
             return Promise.resolve({
                 json: () =>
-                    Promise.resolve({ translation: 'Manzana' }), // Return a single object with a translation property
+                    Promise.resolve({ translation: 'Manzana' }),
             });
         } else if (url.startsWith('/words/')) {
             const language = url.split('/').pop();
             return Promise.resolve({
                 json: () =>
                     Promise.resolve([
-                        { word: 'Apple', id: 1, translation: 'Manzana' }, // Return the first word
-                        { word: 'Banana', id: 2, translation: 'Plátano' }, // Return the second word
+                        { word: 'Apple', id: 1, translation: 'Manzana' },
+                        { word: 'Banana', id: 2, translation: 'Plátano' },
                     ]),
             });
         } else if (url === '/languages') {
@@ -33,6 +33,16 @@ beforeEach(() => {
     });
 });
 
+const setup = async () => {
+    const utils = render(<PracticeWords />);
+    await waitFor(() => screen.getByRole('option', { name: 'Spanish' }));
+    const select = utils.getByTestId('select-language');
+    const option = utils.getByText('Spanish');
+    fireEvent.change(select, { target: { value: 'es' } });
+    await waitFor(() => utils.getByTestId('answer-input'));
+    return utils;
+};
+
 describe('PracticeWords', () => {
     it('renders correctly', () => {
         const { getByText } = render(<PracticeWords />);
@@ -40,31 +50,15 @@ describe('PracticeWords', () => {
     });
 
     it('fetches languages on mount', async () => {
-        const { getByText } = render(<PracticeWords />);
-        await waitFor(() => getByText('Select a language'));
-
+        await setup();
         expect(fetch).toHaveBeenCalledTimes(2);
         expect(fetch).toHaveBeenNthCalledWith(1, '/languages');
     });
 
     it('handles language change', async () => {
-        const { getByText, getByTestId } = render(<PracticeWords />);
-
-        // Wait for the languages to be fetched
-        await waitFor(() => getByText('Select a language'));
-
-        // Now the select element should be available
-        const select = getByTestId('select-language');
-        const option = getByText('Spanish');
-
-        fireEvent.change(select, { target: { value: 'es' } });
-
-        // Wait for the words to be fetched
-        await waitFor(() => getByTestId('answer-input'));
-
-        const wordElement = getByTestId('word-label'); // add a data-testid="word-label" to your label
+        const { getByTestId } = await setup();
+        const wordElement = getByTestId('word-label');
         const wordText = wordElement.textContent;
-
         expect(fetch).toHaveBeenCalledTimes(2);
         expect(fetch).toHaveBeenNthCalledWith(2, '/words/es');
     });
@@ -75,42 +69,17 @@ describe('PracticeWords', () => {
     });
 
     it('calls checkUserAnswer when Check button is clicked', async () => {
-        const { getByText, getByTestId } = render(<PracticeWords />);
-        await waitFor(() => getByText('Select a language'));
-
-        const select = getByTestId('select-language');
-        const option = getByText('Spanish');
-
-        fireEvent.change(select, { target: { value: 'es' } });
-        await waitFor(() => getByTestId('answer-input'));
-
-        const wordElement = getByTestId('word-label'); // add a data-testid="word-label" to your label
-        const wordText = wordElement.textContent;
-
+        const { getByText } = await setup();
         const checkButton = getByText('Check');
         fireEvent.click(checkButton);
-
         expect(global.fetch).toHaveBeenCalledTimes(2);
     });
 
     it('renders correct translation when answer is incorrect', async () => {
-        const { getByText, getByTestId } = render(<PracticeWords />);
-
-        // Wait for the languages to be fetched
-        await waitFor(() => getByText('Select a language'));
-
-        // Now the select element should be available
-        const select = getByTestId('select-language');
-        const option = getByText('Spanish');
-
+        const { getByText, getByTestId } = await setup();
         const correctTranslation = await global.fetch('/translations/')
             .then(response => response.json())
             .then(data => data.translation);
-
-        fireEvent.change(select, { target: { value: 'es' } });
-
-        // Wait for the words to be fetched
-        await waitFor(() => getByTestId('answer-input'));
 
         const wordElement = getByTestId('word-label');
         const wordText = wordElement.textContent;
@@ -120,9 +89,9 @@ describe('PracticeWords', () => {
         // Simulate answering the word incorrectly 3 times
         for (let i = 0; i < 3; i++) {
             const input = getByTestId('answer-input');
-            fireEvent.change(input, { target: { value: 'wrong answer' } }); // Send an incorrect answer
+            fireEvent.change(input, { target: { value: 'wrong answer' } });
             fireEvent.click(checkButton);
-            await new Promise(resolve => setTimeout(resolve, 100)); // Add a 100ms delay
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
 
         // Wait for the correct translation to be rendered
@@ -130,17 +99,7 @@ describe('PracticeWords', () => {
     });
 
     it('renders Next button when answer is correct', async () => {
-        const { getByText, getByTestId } = render(<PracticeWords />);
-        await waitFor(() => screen.getByRole('option', { name: 'Spanish' }));
-
-        const select = getByTestId('select-language');
-        const option = getByText('Spanish');
-
-        fireEvent.change(select, { target: { value: 'es' } });
-        await waitFor(() => getByTestId('answer-input'));
-
-        const wordElement = getByTestId('word-label'); // add a data-testid="word-label" to your label
-        const wordText = wordElement.textContent;
+        const { getByText, getByTestId } = await setup();
 
         const input = getByTestId('answer-input');
         fireEvent.change(input, { target: { value: 'Manzana' } });
@@ -151,21 +110,72 @@ describe('PracticeWords', () => {
         await waitFor(() => getByText('Next'));
     });
 
-    it.only('renders Skip button when answer is incorrect', async () => {
-        const { getByText, getByTestId } = render(<PracticeWords />);
+    it('renders Skip button when answer is incorrect', async () => {
+        const { getByText, getByTestId } = await setup();
 
-        // Wait for the component to finish loading
-        await waitFor(() => getByText('Check'));
-
-        // Simulate a change event on the input field with a valid answer
         const answerInput = getByTestId('answer-input');
         fireEvent.change(answerInput, { target: { value: 'some answer' } });
 
-        // Simulate a click on the Check button
         const checkButton = getByText('Check');
         fireEvent.click(checkButton);
 
-        // Now the Skip button should be rendered
         await waitFor(() => getByText('Skip'));
+    });
+
+    it('renders practice again button and displays celebration message when all words have been answered', async () => {
+        const { getByText, getByTestId } = await setup();
+        for (let i = 0; i < 2; i++) {
+            const wordLabel = getByTestId('word-label');
+            const word = wordLabel.textContent;
+            const response = await fetch(`/words/${word}/translations/es`);
+            const data = await response.json();
+            const translation = data.translation;
+            const input = getByTestId('answer-input');
+            fireEvent.change(input, { target: { value: translation } });
+            const checkButton = getByText('Check');
+            fireEvent.click(checkButton);
+
+            // Only wait for the 'Next' button if it's not the last word
+            if (i < 1) {
+                await waitFor(() => getByText('Next'));
+                const nextButton = getByText('Next');
+                fireEvent.click(nextButton);
+            }
+        }
+        await waitFor(() => getByText('Practice again'));
+        await waitFor(() => getByText('Congratulations! You have correctly answered all words.'));
+    });
+
+    it('handles image loading errors', async () => {
+        const words = [{ word: 'Fruit', id: 1, translation: 'Fruta' }];
+        jest.spyOn(global, 'fetch').mockImplementation((url) => {
+            if (url.includes('/translations/')) {
+                return Promise.resolve({
+                    json: () => Promise.resolve({ translation: 'Manzana' }),
+                });
+            } else if (url.startsWith('/words/')) {
+                return Promise.resolve({
+                    json: () => Promise.resolve(words),
+                });
+            } else if (url === '/languages') {
+                return Promise.resolve({
+                    json: () => Promise.resolve([
+                        { name: 'Spanish', code: 'es' },
+                        { name: 'English', code: 'en' },
+                    ]),
+                });
+            } else {
+                throw new Error(`Unknown URL: ${url}`);
+            }
+        });
+
+        const utils = render(<PracticeWords />);
+        await waitFor(() => utils.getByAltText('Fruit'));
+        const image = utils.getByAltText('Fruit');
+        expect(image.src).toBe('http://localhost/icons/Fruit.png');
+        // Simulate an image loading error
+        fireEvent.error(image);
+        // Wait for the onError event handler to be called
+        await waitFor(() => expect(image.src).toBe('http://localhost/icons/empty-basket.png'));
     });
 });

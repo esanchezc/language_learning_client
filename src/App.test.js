@@ -6,7 +6,7 @@ import PracticeWords from './PracticeWords';
 import LearnWords from './LearnWords';
 import AddNewWords from './AddNewWords';
 
-describe.skip('App component', () => {
+describe('App component', () => {
     it('renders correctly', () => {
         const { getByText } = render(
             <BrowserRouter>

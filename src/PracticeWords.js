@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import deburr from 'lodash.deburr';
-import 'font-awesome/css/font-awesome.min.css';
-import './styles/base.css';
 
 function PracticeWords() {
     const [selectedLanguage, setSelectedLanguage] = useState('');
@@ -17,7 +15,6 @@ function PracticeWords() {
     const [incorrectCount, setIncorrectCount] = useState(0);
     const [showDialog, setShowDialog] = useState(false);
     const [newLanguage, setNewLanguage] = useState('');
-    const [correctTranslation, setCorrectTranslation] = useState('');
     const inputRef = useRef(null);
 
     useEffect(() => {
@@ -32,12 +29,18 @@ function PracticeWords() {
             });
     }, []);
 
+    useEffect(() => {
+        if (selectedLanguage) {
+            fetchWords(selectedLanguage);
+        }
+    }, [selectedLanguage]);
+
     const fetchWords = (language) => {
         fetch(`/words/${language}`)
             .then(response => response.json())
             .then(data => {
-                const shuffledData = data.sort(() => Math.random() - 0.5); // shuffle the array
-                setWords(shuffledData.slice(0, 10)); // select up to 10 words or all if less than 10
+                const shuffledData = data.sort(() => Math.random() - 0.5); 
+                setWords(shuffledData.slice(0, 10)); 
                 const randomWord = shuffledData[0];
                 setCurrentWord(randomWord);
                 setImage(`/icons/${randomWord.word}.png`);
@@ -46,28 +49,17 @@ function PracticeWords() {
             });
     };
 
-    useEffect(() => {
-        if (selectedLanguage) {
-            fetchWords(selectedLanguage);
-        }
-    }, [selectedLanguage]);
-
-    useEffect(() => {
-        console.log('incorrectCount:', incorrectCount);
-    }, [incorrectCount]);
-
     const checkUserAnswer = async () => {
         const response = await fetch(`/words/${correctAnswer}/translations/${selectedLanguage}`);
         const data = await response.json();
         const correctTranslation = data.translation;
-        setCorrectTranslation(correctTranslation);
         const cleanUserAnswer = deburr(userAnswer.toLowerCase());
         const cleanCorrectTranslation = deburr(correctTranslation.toLowerCase());
         if (cleanUserAnswer && cleanCorrectTranslation) {
             if (cleanUserAnswer === cleanCorrectTranslation) {
                 setIsCorrect(true);
                 setCorrectCount(correctCount + 1);
-                setWords(words.filter(word => word.id !== correctAnswer)); // remove the word from the list
+                setWords(words.filter(word => word.id !== correctAnswer)); 
                 setIncorrectCount(0);
             } else {
                 setIsCorrect(false);
@@ -79,8 +71,8 @@ function PracticeWords() {
     const handleCheck = async (event) => {
         event.preventDefault();
         if (userAnswer.trim() !== '') {
-            setUserAnswer(userAnswer.trim()); // update userAnswer state
-            await checkUserAnswer(); // wait for checkUserAnswer to finish
+            setUserAnswer(userAnswer.trim()); 
+            await checkUserAnswer(); 
             if (!isCorrect) {
                 setUserAnswer('');
                 inputRef.current.focus();
@@ -110,7 +102,7 @@ function PracticeWords() {
             setIncorrectCount(0);
             inputRef.current.focus();
         } else {
-            setImage('/icons/celebration.png'); // show a celebratory image
+            setImage('/icons/celebration.png'); 
         }
     };
 
@@ -217,7 +209,7 @@ function PracticeWords() {
                     </div>
                 )}
                 {incorrectCount >= 3 && (
-                    <p className="correct-translation">Correct translation: {correctTranslation}</p>
+                    <p className="correct-translation">Correct translation: {currentWord.translation}</p>
                 )}
             </form>
         </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import LearnWords from './LearnWords';
 
-describe.skip('LearnWords component', () => {
+describe('LearnWords component', () => {
     const originalFetch = global.fetch;
 
     beforeEach(() => {

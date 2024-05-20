@@ -6,7 +6,7 @@ import AddNewWords from './AddNewWords';
 
 jest.mock('axios');
 
-describe.skip('AddNewWords component', () => {
+describe('AddNewWords component', () => {
     const setup = async () => {
         const utils = render(<AddNewWords />);
         await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
