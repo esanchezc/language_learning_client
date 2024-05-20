@@ -17,4 +17,4 @@ jobs:
 
       - name: Run tests
         run: npm run test
-        fail-on-error: true
+        continue-on-error: false
