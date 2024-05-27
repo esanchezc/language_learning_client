@@ -23,3 +23,6 @@ yarn-debug.log*
 yarn-error.log*
 concatenate.sh
 concatenated.txt
+
+cypress/downloads
+cypress/screenshots
