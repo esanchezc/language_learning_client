@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useImperativeHandle } from 'react';
 import './styles/base.css';
 
 function LearnWords() {
@@ -9,6 +9,7 @@ function LearnWords() {
     const [languages, setLanguages] = useState([]);
     const [image, setImage] = useState('');
     const [translation, setTranslation] = useState('');
+
 
     useEffect(() => {
         fetch('/languages')
@@ -115,9 +116,6 @@ function LearnWords() {
             {error && (
                 <div>
                     <p style={{ color: 'red' }}>{error}</p>
-                    <p>
-                        <a href="/add-new-words">Add the missing translation</a>
-                    </p>
                 </div>
             )}
         </form>
