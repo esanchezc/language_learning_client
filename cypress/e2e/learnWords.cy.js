@@ -1,6 +1,7 @@
 describe('LearnWords page', () => {
     beforeEach(() => {
         cy.visit('/learn-words');
+        cy.get('h1', {timeout: 10000}).should('be.visible');
     });
 
     it('calls the handleNextClick function when the next button is clicked', () => {
