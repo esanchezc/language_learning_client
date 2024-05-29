@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles/base.css';
 
 function LearnWords() {
@@ -9,7 +9,6 @@ function LearnWords() {
     const [languages, setLanguages] = useState([]);
     const [image, setImage] = useState('');
     const [translation, setTranslation] = useState('');
-
 
     useEffect(() => {
         fetch('/languages')
@@ -53,7 +52,7 @@ function LearnWords() {
                     setError('Error parsing JSON response.');
                 });
         }
-    }, [currentWordIndex, selectedLanguage]);
+    }, [currentWordIndex, selectedLanguage, words]); // add words to the dependency array
 
     const handleNextClick = () => {
         setCurrentWordIndex((currentWordIndex + 1) % words.length);
