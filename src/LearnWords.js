@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles/base.css';
 
 function LearnWords() {
@@ -10,40 +10,72 @@ function LearnWords() {
     const [image, setImage] = useState('');
     const [translation, setTranslation] = useState('');
 
-    const handleNextClick = useCallback(() => {
+    useEffect(() => {
+        fetch('/languages')
+            .then(response => response.json())
+            .then(data => {
+                setLanguages(data);
+                const spanishLanguage = data.find(language => language.name === 'Spanish');
+                if (spanishLanguage) {
+                    setSelectedLanguage(spanishLanguage.code);
+                }
+            });
+    }, []);
+
+    useEffect(() => {
+        fetch('/words')
+            .then(response => response.json())
+            .then(data => {
+                setWords(data);
+                setCurrentWordIndex(Math.floor(Math.random() * data.length));
+            })
+            .catch(error => {
+                setError(error.message)
+            });
+    }, []);
+
+    useEffect(() => {
+        if (words.length > 0 && selectedLanguage) {
+            const currentWord = words[currentWordIndex];
+            setImage(`/icons/${currentWord.word}.png`);
+            fetch(`/words/${currentWord.id}/translations/${selectedLanguage}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.translation) {
+                        setTranslation(data.translation);
+                    } else {
+                        setTranslation('');
+                        setError('Translation not found.');
+                    }
+                })
+                .catch(error => {
+                    setError('Error parsing JSON response.');
+                });
+        }
+    }, [currentWordIndex, selectedLanguage, words]); // add words to the dependency array
+
+    const handleNextClick = () => {
         setCurrentWordIndex((currentWordIndex + 1) % words.length);
         setError(null); // Clear the error message
-    }, [words, currentWordIndex]);
+    };
 
-    const handlePrevClick = useCallback(() => {
+    const handlePrevClick = () => {
         setCurrentWordIndex((currentWordIndex - 1 + words.length) % words.length);
         setError(null); // Clear the error message
-    }, [words, currentWordIndex]);
+    };
 
-    const handleLanguageChange = useCallback((event) => {
+    const handleLanguageChange = (event) => {
         setSelectedLanguage(event.target.value);
         setError(null); // Clear the error message
-    }, []);
+    };
 
-    const onImageError = useCallback((event) => {
+    const onImageError = (event) => {
         event.target.src = '/icons/empty-basket.png';
-    }, []);
+    }
 
-    const imageComponent = useMemo(() => {
-        if (words.length > 0) {
-            return (
-                <div className="image-container">
-                    <img src={image} alt="Word" onError={onImageError} />
-                    <label className="original-word">{words[currentWordIndex].word}</label>
-                    <label className="translated-word">{translation}</label>
-                </div>
-            );
-        }
-        return null;
-    }, [words, image, currentWordIndex, translation]);
-
-    const languageSelect = useMemo(() => {
-        return (
+    return (
+        <form className="centered-form">
+            <h1>Learn Words</h1>
             <select
                 data-testid="language-select"
                 className="select-language"
@@ -57,14 +89,13 @@ function LearnWords() {
                     </option>
                 ))}
             </select>
-        );
-    }, [languages, selectedLanguage]);
-
-    return (
-        <form className="centered-form">
-            <h1>Learn Words</h1>
-            {languageSelect}
-            {imageComponent}
+            {words.length > 0 && (
+                <div className="image-container">
+                    <img src={image} alt="Word" onError={onImageError} />
+                    <label className="original-word">{words[currentWordIndex].word}</label>
+                    <label className="translated-word">{translation}</label>
+                </div>
+            )}
             <div className="button-container">
                 <button
                     type="button"
