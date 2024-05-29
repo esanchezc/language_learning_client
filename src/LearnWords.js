@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import './styles/base.css';
 
 function LearnWords() {
@@ -10,72 +10,40 @@ function LearnWords() {
     const [image, setImage] = useState('');
     const [translation, setTranslation] = useState('');
 
-    useEffect(() => {
-        fetch('/languages')
-            .then(response => response.json())
-            .then(data => {
-                setLanguages(data);
-                const spanishLanguage = data.find(language => language.name === 'Spanish');
-                if (spanishLanguage) {
-                    setSelectedLanguage(spanishLanguage.code);
-                }
-            });
-    }, []);
-
-    useEffect(() => {
-        fetch('/words')
-            .then(response => response.json())
-            .then(data => {
-                setWords(data);
-                setCurrentWordIndex(Math.floor(Math.random() * data.length));
-            })
-            .catch(error => {
-                setError(error.message)
-            });
-    }, []);
-
-    useEffect(() => {
-        if (words.length > 0 && selectedLanguage) {
-            const currentWord = words[currentWordIndex];
-            setImage(`/icons/${currentWord.word}.png`);
-            fetch(`/words/${currentWord.id}/translations/${selectedLanguage}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.translation) {
-                        setTranslation(data.translation);
-                    } else {
-                        setTranslation('');
-                        setError('Translation not found.');
-                    }
-                })
-                .catch(error => {
-                    setError('Error parsing JSON response.');
-                });
-        }
-    }, [currentWordIndex, selectedLanguage, words]); // add words to the dependency array
-
-    const handleNextClick = () => {
+    const handleNextClick = useCallback(() => {
         setCurrentWordIndex((currentWordIndex + 1) % words.length);
         setError(null); // Clear the error message
-    };
+    }, [words, currentWordIndex]);
 
-    const handlePrevClick = () => {
+    const handlePrevClick = useCallback(() => {
         setCurrentWordIndex((currentWordIndex - 1 + words.length) % words.length);
         setError(null); // Clear the error message
-    };
+    }, [words, currentWordIndex]);
 
-    const handleLanguageChange = (event) => {
+    const handleLanguageChange = useCallback((event) => {
         setSelectedLanguage(event.target.value);
         setError(null); // Clear the error message
-    };
+    }, []);
 
-    const onImageError = (event) => {
+    const onImageError = useCallback((event) => {
         event.target.src = '/icons/empty-basket.png';
-    }
+    }, []);
 
-    return (
-        <form className="centered-form">
-            <h1>Learn Words</h1>
+    const imageComponent = useMemo(() => {
+        if (words.length > 0) {
+            return (
+                <div className="image-container">
+                    <img src={image} alt="Word" onError={onImageError} />
+                    <label className="original-word">{words[currentWordIndex].word}</label>
+                    <label className="translated-word">{translation}</label>
+                </div>
+            );
+        }
+        return null;
+    }, [words, image, currentWordIndex, translation]);
+
+    const languageSelect = useMemo(() => {
+        return (
             <select
                 data-testid="language-select"
                 className="select-language"
@@ -89,13 +57,14 @@ function LearnWords() {
                     </option>
                 ))}
             </select>
-            {words.length > 0 && (
-                <div className="image-container">
-                    <img src={image} alt="Word" onError={onImageError} />
-                    <label className="original-word">{words[currentWordIndex].word}</label>
-                    <label className="translated-word">{translation}</label>
-                </div>
-            )}
+        );
+    }, [languages, selectedLanguage]);
+
+    return (
+        <form className="centered-form">
+            <h1>Learn Words</h1>
+            {languageSelect}
+            {imageComponent}
             <div className="button-container">
                 <button
                     type="button"
