@@ -175,7 +175,7 @@ function PracticeWords() {
                 )}
                 {words.length > 0 && (
                     <div className="image-container">
-                        <img src={image} alt="Fruit" className="image"  onError={onImageError} />
+                        <img src={image} alt="Fruit" className="image"  onError={onImageError} data-testid="word-image" />
                         <label data-testid="word-label">{wordName}</label>
                     </div>
                 )}
