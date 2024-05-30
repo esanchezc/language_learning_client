@@ -39,11 +39,11 @@ function PracticeWords() {
         fetch(`/words/${language}`)
             .then(response => response.json())
             .then(data => {
-                const shuffledData = data.sort(() => Math.random() - 0.5); 
-                setWords(shuffledData.slice(0, 10)); 
+                const shuffledData = data.sort(() => Math.random() - 0.5);
+                setWords(shuffledData.slice(0, 10));
                 const randomWord = shuffledData[0];
                 setCurrentWord(randomWord);
-                setImage(`/icons/${randomWord.word}.png`);
+                setImage(`/icons/${randomWord.word.toLowerCase()}.png`);
                 setCorrectAnswer(randomWord.id);
                 setWordName(randomWord.word);
             });
@@ -59,7 +59,7 @@ function PracticeWords() {
             if (cleanUserAnswer === cleanCorrectTranslation) {
                 setIsCorrect(true);
                 setCorrectCount(correctCount + 1);
-                setWords(words.filter(word => word.id !== correctAnswer)); 
+                setWords(words.filter(word => word.id !== correctAnswer));
                 setIncorrectCount(0);
             } else {
                 setIsCorrect(false);
@@ -71,8 +71,8 @@ function PracticeWords() {
     const handleCheck = async (event) => {
         event.preventDefault();
         if (userAnswer.trim() !== '') {
-            setUserAnswer(userAnswer.trim()); 
-            await checkUserAnswer(); 
+            setUserAnswer(userAnswer.trim());
+            await checkUserAnswer();
             if (!isCorrect) {
                 setUserAnswer('');
                 inputRef.current.focus();
@@ -94,7 +94,7 @@ function PracticeWords() {
         if (words.length > 0) {
             const randomWord = words[Math.floor(Math.random() * words.length)];
             setCurrentWord(randomWord);
-            setImage(`/icons/${randomWord.word}.png`);
+            setImage(`/icons/${randomWord.word.toLowerCase()}.png`);
             setCorrectAnswer(randomWord.id);
             setWordName(randomWord.word);
             setUserAnswer('');
@@ -102,7 +102,7 @@ function PracticeWords() {
             setIncorrectCount(0);
             inputRef.current.focus();
         } else {
-            setImage('/icons/celebration.png'); 
+            setImage('/icons/celebration.png');
         }
     };
 
@@ -139,14 +139,14 @@ function PracticeWords() {
                     <div className="modal-content">
                         <h3>Are you sure you want to switch languages?</h3>
                         <p>This will reset your correct answers count.</p>
-                        <button onClick={handleDialogConfirm}>Yes</button>
+                        <button data-testid="dialog-confirm-button" onClick={handleDialogConfirm}>Yes</button>
                         <button onClick={handleDialogCancel}>No</button>
                     </div>
                 </div>
             )}
             <h1>Practice Words</h1>
             {words.length > 0 ? (
-                <p className="correct-answers">Correct Answers: {correctCount}</p>
+                <p data-testid="correct-answers" className="correct-answers">Correct Answers: {correctCount}</p>
             ) : (
                 <div className="celebration-container">
                     <img src="/icons/celebration.png" alt="Celebration" className="celebration-image" />
@@ -175,7 +175,7 @@ function PracticeWords() {
                 )}
                 {words.length > 0 && (
                     <div className="image-container">
-                        <img src={image} alt="Fruit" className="image" onError={onImageError} />
+                        <img src={image} alt="Fruit" className="image"  onError={onImageError} />
                         <label data-testid="word-label">{wordName}</label>
                     </div>
                 )}
@@ -185,7 +185,7 @@ function PracticeWords() {
                 {words.length > 0 && (
                     <div className="button-group">
                         {!isCorrect && (
-                            <button type="submit" onClick={handleCheck} disabled={incorrectCount >= 3} className={incorrectCount >= 3 ? 'disabled-button' : ''}>Check</button>
+                            <button data-testid="check-button" type="submit" onClick={handleCheck} disabled={incorrectCount >= 3} className={incorrectCount >= 3 ? 'disabled-button' : ''}>Check</button>
                         )}
                         {(isCorrect || incorrectCount >= 3) && (
                             <button autoFocus onClick={handleNext}>Next</button>

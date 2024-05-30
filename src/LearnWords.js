@@ -37,7 +37,7 @@ function LearnWords() {
     useEffect(() => {
         if (words.length > 0 && selectedLanguage) {
             const currentWord = words[currentWordIndex];
-            setImage(`/icons/${currentWord.word}.png`);
+            setImage(`/icons/${currentWord.word.toLowerCase()}.png`);
             fetch(`/words/${currentWord.id}/translations/${selectedLanguage}`)
                 .then(response => response.json())
                 .then(data => {

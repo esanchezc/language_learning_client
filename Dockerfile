@@ -12,4 +12,4 @@ COPY . .
 
 # Expose port and start command
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["npm", "start", "--public-url", "/"]
