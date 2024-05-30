@@ -150,9 +150,9 @@ function PracticeWords() {
             ) : (
                 <div className="celebration-container">
                     <img src="/icons/celebration.png" alt="Celebration" className="celebration-image" />
-                    <h2 className="congratulations-message">Congratulations! You have correctly answered all words.</h2>
+                    <h2 data-testid="celebration-message" className="congratulations-message">Congratulations! You have correctly answered all words.</h2>
                     <div className="button-group">
-                        <button onClick={handlePracticeAgain}>Practice again</button>
+                        <button data-testid="practice-again-button" onClick={handlePracticeAgain}>Practice again</button>
                         <button onClick={() => window.location.href = '/'}>Home</button>
                     </div>
                 </div>
@@ -188,10 +188,10 @@ function PracticeWords() {
                             <button data-testid="check-button" type="submit" onClick={handleCheck} disabled={incorrectCount >= 3} className={incorrectCount >= 3 ? 'disabled-button' : ''}>Check</button>
                         )}
                         {(isCorrect || incorrectCount >= 3) && (
-                            <button autoFocus onClick={handleNext}>Next</button>
+                            <button data-testid="next-button" autoFocus onClick={handleNext}>Next</button>
                         )}
                         {isCorrect === false && incorrectCount < 3 && (
-                            <button onClick={handleSkip}>Skip</button>
+                            <button data-testid="skip-button" onClick={handleSkip}>Skip</button>
                         )}
                     </div>
                 )}
@@ -209,7 +209,7 @@ function PracticeWords() {
                     </div>
                 )}
                 {incorrectCount >= 3 && (
-                    <p className="correct-translation">Correct translation: {currentWord.translation}</p>
+                    <p data-testid="correct-translation" className="correct-translation">Correct translation: {currentWord.translation}</p>
                 )}
             </form>
         </div>

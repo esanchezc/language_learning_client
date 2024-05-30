@@ -1,4 +1,4 @@
-describe.skip('LearnWords page', () => {
+describe('LearnWords page', () => {
     beforeEach(() => {
         cy.visit('/learn-words');
         cy.get('h1', {timeout: 10000}).should('be.visible');
