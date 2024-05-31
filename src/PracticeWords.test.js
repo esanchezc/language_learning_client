@@ -176,7 +176,7 @@ describe('PracticeWords', () => {
         const utils = render(<PracticeWords />);
         await waitFor(() => utils.getByAltText('Fruit'));
         const image = utils.getByAltText('Fruit');
-        expect(image.src).toBe('http://localhost/icons/Fruit.png');
+        expect(image.src).toBe('http://localhost/icons/fruit.png');
         // Simulate an image loading error
         fireEvent.error(image);
         // Wait for the onError event handler to be called

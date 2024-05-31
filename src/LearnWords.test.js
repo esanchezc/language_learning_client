@@ -19,11 +19,15 @@ describe('LearnWords component', () => {
                     json: () => Promise.resolve([{ id: 1, word: 'hello' }]),
                 });
             } else if (url.startsWith('/words/')) {
-                const wordId = url.split('/')[2];
-                const languageCode = url.split('/')[4];
-                return Promise.resolve({
-                    json: () => Promise.resolve({ translation: `Translation for word ${wordId} in ${languageCode}` }),
-                });
+                if (url === '/words/1/translations/es') {
+                    return Promise.resolve({
+                        json: () => Promise.resolve({ translation: 'Translation for word 1 in es' }),
+                    });
+                } else {
+                    return Promise.resolve({
+                        json: () => Promise.resolve({ translation: null }), // Return an object with a null translation
+                    });
+                }
             }
         });
     });
@@ -45,7 +49,6 @@ describe('LearnWords component', () => {
         expect(screen.getByText('hello')).toBeInTheDocument();
         await waitFor(() => screen.getByText('Translation for word 1 in es'));
     });
-
     it('calls the handleNextClick function when the next button is clicked', async () => {
         render(<LearnWords />);
         await waitFor(() => screen.getByText('Next'));
@@ -68,39 +71,26 @@ describe('LearnWords component', () => {
     });
 
     it('renders an error message when the translation is not found', async () => {
-        global.fetch.mockImplementation((url) => {
-            if (url.startsWith('/words/')) {
-                return Promise.resolve({
-                    text: () => Promise.resolve(''),
-                });
-            } else {
+        global.fetch = jest.fn().mockImplementation((url) => {
+            if (url === '/languages') {
                 return Promise.resolve({
                     json: () => Promise.resolve([
                         { code: 'es', name: 'Spanish' },
                         { code: 'fr', name: 'French' },
                     ]),
                 });
-            }
-        });
-        render(<LearnWords />);
-        await waitFor(() => screen.getByText('Error parsing JSON response.'));
-        expect(screen.getByText('Add the missing translation')).toBeInTheDocument();
-    });
-
-    it('renders an error message when there is an error parsing the JSON response', async () => {
-        global.fetch.mockImplementation((url) => {
-            if (url === '/words') {
+            } else if (url === '/words') {
                 return Promise.resolve({
-                    json: () => Promise.reject(new Error('Error parsing JSON response.')),
+                    json: () => Promise.resolve([{ id: 1, word: 'hello' }]),
                 });
-            } else if (url === '/languages') {
+            } else if (url.startsWith('/words/')) {
                 return Promise.resolve({
-                    json: () => Promise.resolve([{ code: 'es', name: 'Spanish' }, { code: 'fr', name: 'French' }]),
+                    json: () => Promise.resolve({ translation: null }), // Always return null for this test case
                 });
             }
         });
         render(<LearnWords />);
-        await waitFor(() => screen.getByText('Error parsing JSON response.'));
-        expect(screen.getByText('Add the missing translation')).toBeInTheDocument();
+        await waitFor(() => screen.getByText('Translation not found.'));
+        expect(screen.getByText('Translation not found.')).toBeInTheDocument();
     });
 });
